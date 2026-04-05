@@ -25,7 +25,7 @@ if topic:
     else:
         try:
             genai.configure(api_key=api_key)
-            model = genai.GenerativeModel('gemini-pro')
+            model = genai.GenerativeModel('gemini-1.5-flash')
 
             # יצירת טבלת טיעונים (Basic vs Brilliant)
             st.header("Step 2: Argument Builder & Vocabulary 💡")
