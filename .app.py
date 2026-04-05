@@ -7,16 +7,20 @@ st.set_page_config(page_title="Module G Writing Master", layout="wide")
 st.title("🎓 Module G: Writing Master")
 st.markdown("### From Basic to Brilliant")
 
-# ניסיון משיכה מה-Secrets
+# משיכת המפתח מה-Secrets
 if "GEMINI_API_KEY" not in st.secrets:
     st.error("Missing API Key! Please add 'GEMINI_API_KEY' to your Streamlit Secrets.")
     st.stop()
 
-# הגדרת המודל בצורה מפורשת
+# הגדרת המפתח
 genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
 
-# שימוש במודל flash-1.5 (הכי יציב כרגע)
-model = genai.GenerativeModel('gemini-1.5-flash')
+# שימוש במודל gemini-pro (יציב יותר לגרסאות ישנות)
+try:
+    model = genai.GenerativeModel('gemini-pro')
+except Exception as e:
+    st.error(f"Model Loading Error: {e}")
+    st.stop()
 
 # שלב 1: נושא
 topic = st.text_input("Step 1: What is the essay topic?", placeholder="e.g., AI in Education")
