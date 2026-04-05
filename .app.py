@@ -2,46 +2,40 @@ import streamlit as st
 import google.generativeai as genai
 
 # הגדרות עמוד
-st.set_page_config(page_title="Module G Writing Master", layout="wide")
+st.set_page_config(page_title="Module G Master", layout="wide")
 
-# כותרות מעוצבות
 st.title("🎓 Module G: Writing Master")
 st.markdown("### From Basic to Brilliant | Inspired by 'Module G Writing' Guide")
 
-# Sidebar להגדרות
+# Sidebar
 with st.sidebar:
     st.header("Setup ⚙️")
     api_key = st.text_input("Enter your Gemini API Key:", type="password")
-    st.markdown("---")
-    st.info("Tip: Use Band III vocabulary to reach the 'Brilliant' level!")
+    st.info("Ensure your requirements.txt is updated!")
 
-# שלב 1: הזנת נושא
-topic = st.text_input("Step 1: What is your essay topic?", placeholder="e.g., Should schools emphasize academic subjects or life skills?")
+# שלב 1: נושא
+topic = st.text_input("Step 1: What is the essay topic?", placeholder="e.g., The role of schools in the 21st century")
 
 if topic:
     st.divider()
     if not api_key:
-        st.warning("Please enter your API Key in the sidebar to start.")
+        st.warning("Please enter your API Key in the sidebar.")
     else:
         try:
-            # הגדרת ה-API
+            # הגדרה ספציפית למניעת שגיאת 404
             genai.configure(api_key=api_key)
-            # שימוש במודל יציב
-            model = genai.GenerativeModel('gemini-pro')
+            model = genai.GenerativeModel(model_name="gemini-1.5-flash")
 
-            # שלב 2: בניית טיעונים ואוצר מילים
+            # שלב 2: בניית טיעונים (Basic to Brilliant)
             st.header("Step 2: Argument Builder & Vocabulary 💡")
             
             prompt = f"""
-            The essay topic is: '{topic}'.
-            Provide a table for a high-school student (Module G level).
-            Include 3 arguments (2 pro, 1 con).
-            Table columns: 
-            - Argument (Short name)
-            - Basic Level (3-unit English)
-            - Brilliant Level (Module G - using Band III and complex structures)
-            - Vocabulary (List advanced words from the brilliant version with Hebrew translations)
-            Format as a Markdown table.
+            The topic is: '{topic}'. Create a table with 3 arguments (2 pro, 1 con).
+            Columns:
+            1. 'The Idea'
+            2. 'Basic Level' (3-unit sentence)
+            3. 'Brilliant Level' (Module G level, Band III, complex grammar)
+            4. 'Keywords' (Advanced words with Hebrew translation)
             """
             
             with st.spinner("Generating brilliant ideas..."):
@@ -50,35 +44,25 @@ if topic:
 
             st.divider()
             
-            # שלב 3: כתיבה ומשוב
-            st.header("Step 3: Write & Upgrade Your Essay ✍️")
-            col1, col2 = st.columns(2)
+            # שלב 3: כתיבה ובדיקה
+            st.header("Step 3: Write & Get Expert Feedback ✍️")
+            col_a, col_b = st.columns(2)
             
-            with col1:
-                st.write("Draft your essay here (120-140 words):")
-                user_essay = st.text_area("Your Draft:", height=350)
-                check_button = st.button("Check My Essay 📊")
-
-            with col2:
-                if check_button and user_essay:
-                    with st.spinner("Analyzing your writing..."):
-                        check_prompt = f"""
-                        Evaluate this essay on the topic '{topic}' based on Module G criteria (Content, Vocabulary, Language).
-                        1. Give a score estimate (out of 40).
-                        2. Identify 3 'Basic' sentences from the student's text.
-                        3. For each, show how to 'Upgrade' it to a 'Brilliant' level (Module G).
-                        4. Provide a short list of 5 Band III words they should add to improve.
-                        
-                        Essay: {user_essay}
-                        """
-                        feedback = model.generate_content(check_prompt)
-                        st.markdown("### 📋 Evaluation & Upgrades")
-                        st.write(feedback.text)
-                elif check_button:
-                    st.error("Please write your essay first!")
+            with col_a:
+                user_essay = st.text_area("Write your essay (120-140 words):", height=400)
+                if st.button("Check My Essay 📊"):
+                    if user_essay:
+                        with st.spinner("Analyzing..."):
+                            check_prompt = f"Evaluate this essay on '{topic}' based on Module G criteria. 1. Score estimate (out of 40). 2. Show 3 'Basic' sentences and their 'Brilliant' upgrades. 3. List 5 Band III words to add. Essay: {user_essay}"
+                            feedback = model.generate_content(check_prompt)
+                            with col_b:
+                                st.markdown("### 📋 Evaluation")
+                                st.write(feedback.text)
+                    else:
+                        st.error("Please write something first!")
 
         except Exception as e:
-            st.error(f"An error occurred: {e}")
+            st.error(f"Error: {e}")
 
 st.markdown("---")
-st.caption("Developed to help students excel in the G-Module writing task. 🌟")
+st.caption("Developed for Excellence in English Writing 🌟")
