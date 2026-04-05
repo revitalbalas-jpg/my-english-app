@@ -1,29 +1,29 @@
 import streamlit as st
 import os
+import subprocess
+import sys
 
-# ניסיון לייבוא הספרייה, ואם היא חסרה - התקנה שקטה
+# מנגנון להבטחת ספרייה מעודכנת ומניעת שגיאות 404
 try:
     import google.generativeai as genai
 except ImportError:
-    import subprocess
-    import sys
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "google-generativeai"])
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "google-generativeai>=0.5.0"])
     import google.generativeai as genai
 
 # הגדרות עמוד
 st.set_page_config(page_title="Module G Writing Master", layout="wide")
 
 st.title("🎓 Module G: Writing Master")
-st.markdown("### From Basic to Brilliant | Improve Your Writing")
+st.markdown("### From Basic to Brilliant | Adapted for 5-Unit Students")
 
 # Sidebar
 with st.sidebar:
     st.header("Setup ⚙️")
     api_key = st.text_input("Enter your Gemini API Key:", type="password")
-    st.info("Tip: If you get a 404 error, wait a minute for the server to update.")
+    st.info("The app is optimized for clear, high-level high school English.")
 
 # שלב 1: נושא
-topic = st.text_input("Step 1: What is your essay topic?", placeholder="e.g., Should students study art in school?")
+topic = st.text_input("Step 1: What is the essay topic?", placeholder="e.g., The impact of AI on education")
 
 if topic:
     st.divider()
@@ -31,43 +31,57 @@ if topic:
         st.warning("Please enter your API Key in the sidebar.")
     else:
         try:
-            # הגדרת ה-API
             genai.configure(api_key=api_key)
-            
-            # הגדרת המודל - שימוש בגרסה יציבה
             model = genai.GenerativeModel('gemini-1.5-flash')
 
-            # שלב 2: בניית טיעונים
+            # שלב 2: בניית טיעונים מותאמים
             st.header("Step 2: Argument Builder & Vocabulary 💡")
             
-            prompt = f"Topic: {topic}. Create a table for Module G high school level. 3 arguments. Columns: Argument, Basic Sentence, Brilliant Sentence (Band III), Hebrew Vocabulary."
+            # הנחיה ל-AI לייצר רמת "אמצע" מתאימה
+            prompt = f"""
+            Topic: {topic}. 
+            Create a table for Israeli high school students (Module G, 5 units).
+            Language should be high-level but accessible (not academic/PhD level).
+            Include 3 arguments.
+            Columns: 
+            1. 'Argument' (Short title)
+            2. 'Basic Level' (Simple 3-unit sentence)
+            3. 'Module G Level' (Using clear connectors like 'Furthermore', 'However' and phrases like 'Take advantage of')
+            4. 'Keywords' (5-unit vocabulary words with Hebrew translation)
+            """
             
-            with st.spinner("Generating ideas..."):
+            with st.spinner("Generating ideas for your students..."):
                 response = model.generate_content(prompt)
                 st.markdown(response.text)
 
             st.divider()
             
             # שלב 3: כתיבה ומשוב
-            st.header("Step 3: Essay Feedback ✍️")
+            st.header("Step 3: Write & Get Feedback ✍️")
             user_essay = st.text_area("Write your essay (120-140 words):", height=300)
             
-            if st.button("Get Feedback 📊"):
+            if st.button("Check My Essay 📊"):
                 if user_essay:
                     with st.spinner("Analyzing..."):
-                        check_prompt = f"Evaluate this essay on {topic} for Module G. Score, 3 sentence upgrades, and 5 Band III words to add. Essay: {user_essay}"
+                        # הנחיה למשוב מאוזן
+                        check_prompt = f"""
+                        Evaluate this essay on '{topic}' for Module G.
+                        1. Estimated Score (out of 40).
+                        2. Content & Language: Give 3 tips to make the English sound more natural for a 5-unit student.
+                        3. Show 3 sentences from the essay and suggest a 'Module G' upgrade for each.
+                        Essay: {user_essay}
+                        """
                         feedback = model.generate_content(check_prompt)
-                        st.markdown("### 📋 Evaluation")
+                        st.markdown("### 📋 Evaluation & Tips")
                         st.write(feedback.text)
                 else:
                     st.error("Please write your essay first!")
 
         except Exception as e:
-            # הודעת שגיאה ידידותית יותר
             if "404" in str(e):
-                st.error("The model is still updating on the server. Please wait 1-2 minutes and refresh the page.")
+                st.error("Server is updating. Please refresh in 1 minute.")
             else:
-                st.error(f"An error occurred: {e}")
+                st.error(f"Error: {e}")
 
 st.markdown("---")
-st.caption("Success in Module G starts here! 🌟")
+st.caption("Helping students reach their potential in English. 🌟")
