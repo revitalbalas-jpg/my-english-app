@@ -1,65 +1,86 @@
 import streamlit as st
 import google.generativeai as genai
 
-st.set_page_config(page_title="G-Module Master", layout="wide")
+# הגדרות תצוגה
+st.set_page_config(page_title="Module G Writing Master", layout="wide", initial_sidebar_state="expanded")
 
-# כותרת האתר
-st.title("📝 Bagrut 5-Points: Writing Master")
-st.markdown("### From Basic to Brilliant - Writing Guide")
+# עיצוב כותרות
+st.title("🎓 Module G: Writing Master")
+st.subheader("From Basic to Brilliant | Inspired by 'Module G Writing' Guide")
 
-# Sidebar להגדרות
+# Sidebar - הגדרות ומפתחות
 with st.sidebar:
-    st.header("Settings ⚙️")
+    st.header("Setup ⚙️")
     api_key = st.text_input("Enter your Gemini API Key:", type="password")
-    st.info("Get your key from [Google AI Studio](https://aistudio.google.com/)")
+    st.markdown("---")
+    st.info("This app helps students upgrade their writing from 3-4 points level to a high 5-points level.")
 
-# שלב 1: נושא החיבור
-topic = st.text_input("Step 1: What is the essay topic?", placeholder="e.g., Should schools start at 10:00 AM?")
+# שלב 1: הזנת נושא
+topic = st.text_input("Step 1: What is your essay topic?", placeholder="e.g., Should students have a four-day school week?")
 
 if topic:
     st.divider()
-    st.header("Step 2: The Essay Blueprint 🗺️")
-    st.info(f"Topic: {topic}")
-
-    # טבלת תבניות - בסיסי מול מתקדם
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.subheader("Basic Writing 😕")
-        st.write("**Intro:** I think that...")
-        st.write("**Body 1:** First, I want to say...")
-        st.write("**Contrast:** But some people think...")
-        st.write("**Conclusion:** To sum up, I believe...")
-
-    with col2:
-        st.subheader("Brilliant Writing (Band III) ✨")
-        st.write("**Intro:** The question of whether... has sparked a *heated debate*.")
-        st.write("**Body 1:** *To begin with*, it is *widely acknowledged* that...")
-        st.write("**Contrast:** *On the other hand*, *proponents* of the opposing view argue...")
-        st.write("**Conclusion:** *In light of the above*, it is *evident* that...")
-
-    # חיבור ל-AI ליצירת תוכן ספציפי
-    if api_key:
+    if not api_key:
+        st.warning("Please enter your API Key in the sidebar to generate arguments.")
+    else:
         try:
             genai.configure(api_key=api_key)
             model = genai.GenerativeModel('gemini-pro')
-            prompt = f"Topic: {topic}. Give 3 specific arguments (2 pro, 1 con) using Band III vocabulary. Provide Hebrew translations for difficult words."
-            response = model.generate_content(prompt)
-            st.success("Custom Ideas for your Topic 💡")
-            st.write(response.text)
-        except:
-            st.warning("Enter a valid API key to get custom ideas.")
 
-    st.divider()
-    st.header("Step 3: Draft Your Essay ✍️")
-    essay_text = st.text_area("Write your 120-140 words essay here:", height=300)
+            # יצירת טבלת טיעונים (Basic vs Brilliant)
+            st.header("Step 2: Argument Builder & Vocabulary 💡")
+            
+            prompt = f"""
+            The topic is: '{topic}'.
+            Create a table for a Module G student with 3 arguments (2 pro, 1 con).
+            Columns: 
+            1. 'The Idea' (short name)
+            2. 'Basic Level' (Simple 3-unit English)
+            3. 'Brilliant Level' (High 5-unit English using Band III, connectors, and complex grammar)
+            4. 'Keywords' (Advanced words with Hebrew translation)
+            """
+            
+            with st.spinner("Building your brilliant arguments..."):
+                response = model.generate_content(prompt)
+                st.markdown(response.text)
 
-    if st.button("Analyze My Writing 📊"):
-        if api_key:
-            with st.spinner("Checking..."):
-                check_prompt = f"Evaluate this essay on '{topic}' based on Module G rubric. Focus on Band III usage. Essay: {essay_text}"
-                res = model.generate_content(check_prompt)
-                st.markdown("### Feedback:")
-                st.write(res.text)
-        else:
-            st.error("Please enter your API Key to get feedback.")
+            st.divider()
+            
+            # שלב 3: כתיבה ובדיקה
+            st.header("Step 3: Write & Get Feedback ✍️")
+            col_a, col_b = st.columns([1, 1])
+            
+            with col_a:
+                st.write("Draft your essay here (120-140 words):")
+                user_essay = st.text_area("Your Essay:", height=400)
+                analyze_button = st.button("Check My Essay 📊")
+
+            with col_b:
+                if analyze_button and user_essay:
+                    with st.spinner("Analyzing according to Module G Rubric..."):
+                        # פרוםט בדיקה מפורט לפי הקריטריונים של הבגרות
+                        check_prompt = f"""
+                        Analyze the following essay on the topic '{topic}' based on the official Module G rubric:
+                        1. Content (Are the ideas relevant and well-developed?)
+                        2. Vocabulary (Is there enough Band III and varied language?)
+                        3. Language Use (Grammar, spelling, and punctuation).
+                        
+                        For each category:
+                        - Give a brief comment.
+                        - Identify 3 'Basic' sentences and show how to 'Upgrade' them to 'Brilliant' level.
+                        - Give a total estimated score (out of 40).
+                        
+                        Essay: {user_essay}
+                        """
+                        feedback = model.generate_content(check_prompt)
+                        st.markdown("### 📋 Expert Feedback")
+                        st.write(feedback.text)
+                elif analyze_button:
+                    st.error("Please write something before clicking check!")
+
+        except Exception as e:
+            st.error(f"An error occurred: {e}")
+
+# עיצוב תחתון
+st.markdown("---")
+st.caption("Developed for English Teachers and Students | Aim for Excellence 🌟")
