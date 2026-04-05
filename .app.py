@@ -7,14 +7,16 @@ st.set_page_config(page_title="Module G Writing Master", layout="wide")
 st.title("🎓 Module G: Writing Master")
 st.markdown("### From Basic to Brilliant")
 
-# משיכת המפתח מה-Secrets
-try:
-    api_key = st.secrets["GEMINI_API_KEY"]
-    genai.configure(api_key=api_key)
-    model = genai.GenerativeModel('gemini-1.5-flash')
-except:
-    st.error("Please set your API Key in the Streamlit Secrets!")
+# ניסיון משיכה מה-Secrets
+if "GEMINI_API_KEY" not in st.secrets:
+    st.error("Missing API Key! Please add 'GEMINI_API_KEY' to your Streamlit Secrets.")
     st.stop()
+
+# הגדרת המודל בצורה מפורשת
+genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
+
+# שימוש במודל flash-1.5 (הכי יציב כרגע)
+model = genai.GenerativeModel('gemini-1.5-flash')
 
 # שלב 1: נושא
 topic = st.text_input("Step 1: What is the essay topic?", placeholder="e.g., AI in Education")
@@ -22,7 +24,6 @@ topic = st.text_input("Step 1: What is the essay topic?", placeholder="e.g., AI 
 if topic:
     st.header("Step 2: Suggestions & Content 💡")
     
-    # הנחיה לבינה המלאכותית להשתמש באוצר המילים של "האמצע"
     prompt = f"""
     Topic: {topic}. 
     Create a table for Israeli high school students (Module G).
@@ -34,6 +35,9 @@ if topic:
     4. 'Key Vocabulary' -> Band III words with Hebrew translation.
     """
     
-    with st.spinner("Generating high-quality content..."):
-        response = model.generate_content(prompt)
-        st.markdown(response.text)
+    try:
+        with st.spinner("Generating content..."):
+            response = model.generate_content(prompt)
+            st.markdown(response.text)
+    except Exception as e:
+        st.error(f"Generation Error: {e}")
