@@ -27,7 +27,7 @@ if topic:
             # הגדרת ה-API
             genai.configure(api_key=api_key)
             # שימוש במודל יציב
-            model = genai.GenerativeModel(model_name="gemini-1.5-flash")
+            model = genai.GenerativeModel('gemini-1.5-flash')
 
             # שלב 2: בניית טיעונים ואוצר מילים
             st.header("Step 2: Argument Builder & Vocabulary 💡")
